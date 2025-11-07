@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="40" viewBox="0 0 160 40" role="img" aria-label="CSO Secure Logo">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8A00"/>
+      <stop offset="100%" stop-color="#FFC107"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="160" height="40" rx="8" fill="#0f151d" stroke="rgba(255,255,255,0.06)"/>
+  <g transform="translate(8,8)">
+    <circle cx="12" cy="12" r="12" fill="#29D3FF"/>
+    <rect x="6" y="8" width="12" height="10" rx="2" fill="#001018" opacity="0.25"/>
+    <path d="M6,10 h12" stroke="#001018" stroke-width="2" opacity="0.5"/>
+  </g>
+  <text x="44" y="16" font-family="Inter, Arial, sans-serif" font-size="12" fill="#FFFFFF">CSO ARS</text>
+  <text x="44" y="30" font-family="Inter, Arial, sans-serif" font-size="10" fill="url(#g)">Automatic Reception System</text>
+</svg>

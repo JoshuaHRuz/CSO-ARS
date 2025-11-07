@@ -1,1 +1,172 @@
-/* You can add global styles to this file, and also import other style files */
+/* CSO ARS — Global Dark Theme and Utilities (Angular 20, no external CSS frameworks) */
+:root {
+  --cso-bg: #0B0F14;
+  --cso-surface: #0f151d;
+  --cso-primary: #29D3FF;
+  --cso-primary-contrast: #001018;
+  --cso-orange-a: #FF8A00;
+  --cso-orange-b: #FFC107;
+  --cso-green-a: #59cd5e;
+  --cso-green-b: #42ff56;
+  --cso-gray: #C0C6CF;
+  --cso-text: #FFFFFF;
+  --cso-border: rgba(255,255,255,0.06);
+  --cso-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+
+html, body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--cso-bg);
+  color: var(--cso-text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+}
+
+/* Accent gradient utility */
+.cso-gradient { background: linear-gradient(135deg, var(--cso-orange-a) 0%, var(--cso-orange-b) 100%); }
+.cso-gradient-green { background: linear-gradient(135deg, var(--cso-green-a) 0%, var(--cso-green-b) 100%); }
+/* Card styles */
+.cso-card, .kpi-card {
+  background: var(--cso-surface);
+  border: 1px solid var(--cso-border);
+  color: var(--cso-text);
+  box-shadow: var(--cso-shadow);
+  border-radius: 10px;
+}
+
+/* KPI emphasis */
+.kpi-number {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Primary button */
+.cso-btn {
+  display: inline-block;
+  background: var(--cso-primary);
+  color: var(--cso-primary-contrast);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cso-btn:hover { filter: brightness(1.06); }
+.cso-btn:focus { outline: 2px solid var(--cso-orange-b); outline-offset: 2px; }
+
+.text-muted-contrast { color: rgba(255,255,255,0.7); }
+
+/* Simple toolbar and sidenav (no Material) */
+.cso-toolbar {
+  height: 56px;
+  background: var(--cso-surface);
+  color: var(--cso-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--cso-border);
+}
+.cso-toolbar .brand { display: flex; align-items: center; gap: 0; }
+.cso-toolbar img { height: 40px; width: auto; }
+
+.cso-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 56px); }
+.cso-sidenav { background: #0d1219; border-right: 1px solid var(--cso-border); padding: 12px; }
+.cso-sidenav a {
+  display: block; color: var(--cso-text); text-decoration: none; padding: 10px 12px; border-radius: 6px;
+}
+.cso-sidenav a.active { background: rgba(41,211,255,0.15); }
+.cso-sidenav a.disabled { opacity: 0.5; pointer-events: none; }
+.cso-content { padding: 16px; }
+
+/* Simple responsive grid helpers */
+.grid { display: grid; gap: 16px; }
+.grid-1 { grid-template-columns: 1fr; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 992px) { .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* Chart containers */
+.chart-panel { background: var(--cso-surface); border: 1px solid var(--cso-border); border-radius: 10px; padding: 12px; }
+.chart-title { margin: 0 0 8px 0; font-weight: 600; }
+
+/* Grouped bars chart styles */
+.cso-bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(60px, 1fr);
+  align-items: stretch;
+  height: 260px;
+  gap: 12px;
+}
+.cso-bars .col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  --label-h: 40px;
+  grid-template-rows: 1fr var(--label-h);
+  height: 100%;
+  gap: 4px;
+}
+
+/* Place label on its own row and span both columns */
+.cso-bars .xlabel { grid-row: 2; grid-column: 1 / -1; margin-top: 6px; font-size: 12px; text-align: center; color: rgba(255,255,255,0.8); }
+
+/* Bars live in the first row and align to bottom */
+.cso-bars .bar { grid-row: 1; align-self: end; border-radius: 6px 6px 0 0; }
+.cso-bars .bar.time { background: var(--cso-primary); }
+.cso-bars .bar.late { background: linear-gradient(180deg, var(--cso-orange-a), var(--cso-orange-b)); }
+
+/* Donut chart basics */
+.cso-donut { display: grid; place-items: center; }
+.cso-donut svg { width: 220px; height: 220px; }
+.cso-legend { display: grid; gap: 6px; margin-top: 8px; font-size: 14px; }
+.cso-legend .item { display: flex; align-items: center; gap: 8px; }
+.cso-legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+/* Forms */
+.form-field { display: grid; gap: 6px; }
+.form-row { display: grid; gap: 12px; grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 900px) { .form-row { grid-template-columns: 1fr; } }
+.input, select {
+  background: #0e1520; color: var(--cso-text); border: 1px solid var(--cso-border); border-radius: 8px; padding: 8px 10px;
+}
+label { color: rgba(255,255,255,0.85); font-size: 14px; }
+
+/* Utility colors */
+.cso-accent { color: var(--cso-orange-b); }
+.cso-warn { color: var(--cso-orange-a); }
+
+
+/* Themed checkboxes (non-Material) */
+.cso-check { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--cso-border); }
+.cso-check input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 4px;
+  border: 1px solid var(--cso-border); background: #0e1520; display: grid; place-items: center; position: relative;
+}
+.cso-check input[type="checkbox"]:checked { background: var(--cso-primary); border-color: var(--cso-primary); box-shadow: 0 0 0 3px rgba(41,211,255,0.15); }
+.cso-check input[type="checkbox"]:checked::after { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--cso-primary-contrast); opacity: 0.9; }
+.cso-check.cso-check--glow input[type="checkbox"]:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(41,211,255,0.25); }
+
+/* Material overrides to match CSO theme */
+.cso-mat-field .mdc-text-field { background: #0e1520; color: var(--cso-text); border-radius: 8px; }
+.cso-mat-field .mdc-line-ripple { background-color: var(--cso-primary); }
+.mat-datepicker-content, .mat-calendar { background: var(--cso-surface); color: var(--cso-text); }
+.mat-calendar-body-selected { background: var(--cso-primary) !important; color: var(--cso-primary-contrast) !important; }
+.mat-calendar-body-today{background: var(--cso-surface) !important; color: var(--cso-primary-contrast) !important; border: var(--cso-primary) 1px solid !important;}
+.mat-calendar-body-in-range::before { background: rgba(41,211,255,0.15) !important; }
+.mat-calendar-body-cell-content { color: white !important; }
+.mat-calendar-arrow { fill: white !important; }
+
+
+/* Hyperlinks */
+
+a { color: var(--cso-primary); text-decoration: none;  }
+a:hover { text-decoration-line: underline; }
+a:focus { outline: 2px solid var(--cso-orange-b); outline-offset: 2px; }
+a:visited { color: var(--cso-primary); }

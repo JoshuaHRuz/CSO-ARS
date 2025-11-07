@@ -1,0 +1,97 @@
+<div class="grid grid-3" style="margin-bottom:16px;">
+  <div class="kpi-card" style="padding:16px; display:flex; align-items:center; gap:12px;">
+    <div style="width:44px; height:44px; border-radius:8px;" class="cso-gradient-green"></div>
+    <div>
+      <div class="text-muted-contrast">Entregadas</div>
+      <div class="kpi-number">{{kpi().entregadas}}</div>
+    </div>
+  </div>
+  <div class="kpi-card" style="padding:16px; display:flex; align-items:center; gap:12px;">
+    <div style="width:44px; height:44px; border-radius:8px; background: var(--cso-primary);"></div>
+    <div>
+      <div class="text-muted-contrast">En proceso y en tiempo</div>
+      <div class="kpi-number">{{kpi().enTiempo}}</div>
+    </div>
+  </div>
+  <div class="kpi-card" style="padding:16px; display:flex; align-items:center; gap:12px;">
+    <div style="width:44px; height:44px; border-radius:8px;" class="cso-gradient"></div>
+    <div>
+      <div class="text-muted-contrast">En proceso y fuera de tiempo</div>
+      <div class="kpi-number">{{kpi().fueraTiempo}}</div>
+    </div>
+  </div>
+</div>
+
+<section class="cso-card" style="padding:16px; margin-bottom:16px;">
+  <h3 style="margin:0 0 12px 0;">Filtros</h3>
+  <div class="form-row">
+    <div class="form-field">
+      <label>Áreas</label>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <label class="cso-check cso-check--filled cso-check--glow" *ngFor="let a of areas" style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" [checked]="selectedAreaSet().has(a)" (change)="toggleArea(a, $event.target.checked)" />
+          <span>{{a}}</span>
+        </label>
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px;">
+        <button class="cso-btn" (click)="selectAll()">Todas</button>
+        <button class="cso-btn" (click)="clearAreas()">Ninguna</button>
+      </div>
+    </div>
+    <div class="form-field" style="grid-column: span 2;">
+      <label>Rango de fechas</label>
+      <mat-form-field appearance="fill" class="cso-mat-field">
+        <mat-date-range-input [rangePicker]="picker">
+          <input matStartDate matInput placeholder="Desde" [(ngModel)]="dateFrom">
+          <input matEndDate matInput placeholder="Hasta" [(ngModel)]="dateTo">
+        </mat-date-range-input>
+        <mat-datepicker-toggle [for]="picker">
+          <span matDatepickerToggleIcon>📅</span>
+        </mat-datepicker-toggle>
+        <mat-date-range-picker #picker (closed)="applyFilters()"></mat-date-range-picker>
+      </mat-form-field>
+    </div>
+  </div>
+</section>
+
+<section class="grid grid-2">
+  <div class="chart-panel" role="img" aria-label="En tiempo vs Fuera de tiempo por área">
+    <h4 class="chart-title">En tiempo vs Fuera de tiempo por Área</h4>
+      <div class="cso-bars" *ngIf="areaAgg().length > 0; else noDataBars">
+        <div class="col" *ngFor="let r of areaAgg(); trackBy: trackArea">
+          <div></div>
+          <div class="bar time" [style.height.%]="barHeight(r.enTiempo)" [title]="tooltip(r, 'En tiempo')"></div>
+          <div class="bar late" [style.height.%]="barHeight(r.fueraTiempo)" [title]="tooltip(r, 'Fuera de tiempo')"></div>
+          <div class="xlabel">{{r.area}}</div>
+        </div>
+      </div>
+    <ng-template #noDataBars>
+      <div class="text-muted-contrast">Sin datos para los filtros seleccionados.</div>
+    </ng-template>
+  </div>
+
+  <div class="chart-panel" role="img" aria-label="Distribución por tipo de entrega">
+    <h4 class="chart-title">Distribución por tipo de entrega</h4>
+    <div class="cso-donut" *ngIf="typeAgg().length > 0; else noDataDonut">
+      <svg viewBox="0 0 220 220" aria-hidden="true">
+        <g transform="translate(110,110) rotate(-90)">
+          <ng-container *ngFor="let t of donutSets(); let i = index">
+            <circle r="90" cx="0" cy="0" [attr.stroke]="t.color" stroke-width="24"
+                    [attr.stroke-dasharray]="t.len + ' ' + (circumference - t.len)"
+                    [attr.stroke-dashoffset]="t.offset"
+                    fill="none"></circle>
+          </ng-container>
+        </g>
+      </svg>
+      <div class="cso-legend">
+        <div class="item" *ngFor="let t of typeAgg()">
+          <span class="swatch" [style.background]="t.color"></span>
+          <span>{{t.tipo}}: {{t.total}} ({{percent(t.total, totalFiltered())}})</span>
+        </div>
+      </div>
+    </div>
+    <ng-template #noDataDonut>
+      <div class="text-muted-contrast">Sin datos para los filtros seleccionados.</div>
+    </ng-template>
+  </div>
+</section>
