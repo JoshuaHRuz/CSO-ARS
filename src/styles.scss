@@ -40,6 +40,15 @@ body {
 .kpi-card:hover{
   cursor: pointer;
 }
+/* KPI layout improvements */
+.kpi-card {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.kpi-icon { width: 44px; height: 44px; border-radius: 8px; }
+.kpi-icon--primary { background: var(--cso-primary); }
 
 /* KPI emphasis */
 .kpi-number {
@@ -98,6 +107,9 @@ body {
 /* Chart containers */
 .chart-panel { background: var(--cso-surface); border: 1px solid var(--cso-border); border-radius: 10px; padding: 12px; }
 .chart-title { margin: 0 0 8px 0; font-weight: 600; }
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.legend-row { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: right; }
+.table-wrap { overflow: auto; }
 
 /* Grouped bars chart styles */
 .cso-bars {
@@ -143,10 +155,15 @@ label { color: rgba(255,255,255,0.85); font-size: 14px; }
 
 /* Filter blocks normalization */
 .form-field > .cso-check { margin-right: 0.5rem; }
-.form-field > div[style*="flex; flex-wrap:wrap"] { margin-bottom: 0.5rem; }
+.chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 0.5rem; }
 .form-field .cso-btn { padding: 0.6rem 1rem; }
 .filter-actions { margin-top: auto; }
 
+/* Utilities */
+.cso-section { padding: 16px; margin-bottom: 16px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-48 { margin-bottom: 3rem; }
+.pr-24 { padding-right: 1.5rem; }
 /* Utility colors */
 .cso-accent { color: var(--cso-orange-b); }
 .cso-warn { color: var(--cso-orange-a); }

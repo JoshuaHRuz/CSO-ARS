@@ -1,20 +1,20 @@
-<div class="grid grid-3" style="margin-bottom:16px;">
-  <div class="kpi-card" style="padding:16px; display:flex; align-items:center; gap:12px;" (click)="updateDetails('Entregadas')">
-    <div style="width:44px; height:44px; border-radius:8px;" class="cso-gradient-green"></div>
+<div class="grid grid-3 mb-16">
+  <div class="kpi-card" (click)="updateDetails('Entregadas')">
+    <div class="kpi-icon cso-gradient-green"></div>
     <div>
       <div class="text-muted-contrast">Entregadas</div>
       <div class="kpi-number">{{kpi().entregadas}}</div>
     </div>
   </div>
-  <div class="kpi-card" style="padding:16px; display:flex; align-items:center; gap:12px;" (click)="updateDetails('En proceso y en tiempo')">
-    <div style="width:44px; height:44px; border-radius:8px; background: var(--cso-primary);"></div>
+  <div class="kpi-card" (click)="updateDetails('En proceso y en tiempo')">
+    <div class="kpi-icon kpi-icon--primary"></div>
     <div>
       <div class="text-muted-contrast">En proceso y en tiempo</div>
       <div class="kpi-number">{{kpi().enTiempo}}</div>
     </div>
   </div>
-  <div class="kpi-card" style="padding:16px; display:flex; align-items:center; gap:12px;" (click)="updateDetails('En proceso y fuera de tiempo')">
-    <div style="width:44px; height:44px; border-radius:8px;" class="cso-gradient"></div>
+  <div class="kpi-card" (click)="updateDetails('En proceso y fuera de tiempo')">
+    <div class="kpi-icon cso-gradient"></div>
     <div>
       <div class="text-muted-contrast">En proceso y fuera de tiempo</div>
       <div class="kpi-number">{{kpi().fueraTiempo}}</div>
@@ -22,13 +22,13 @@
   </div>
 </div>
 @if (showTimeDetails != null) {
-  <section class="cso-card" style="padding:16px; margin-bottom:16px;">
-    <div style="display:flex; justify-content: space-between; align-items: center; width: 100%;">
+  <section class="cso-card cso-section">
+    <div class="chart-header" style="width: 100%;">
       <h3>{{ showTimeDetails }}</h3>
-      <i class="bi bi-caret-up" style="padding-right: 1.5rem;" (click)="closeDetails()"></i>
+      <i class="bi bi-caret-up pr-24" (click)="closeDetails()"></i>
     </div>
 
-    <div style="overflow:auto;">
+    <div class="table-wrap">
       <table mat-table [dataSource]="dataSource" matSort [matSortActive]="'id'" matSortDirection="asc" class="cso-mat-table mat-elevation-z0">
 
         <ng-container matColumnDef="id">
@@ -89,33 +89,33 @@
 }
 
 
-<section class="cso-card" style="padding:16px; margin-bottom:16px;">
+<section class="cso-card cso-section">
   <h3 style="margin:0 0 12px 0;">Filtros</h3>
   <div class="form-row">
     <div class="form-field">
       <label>Áreas</label>
-      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <div class="chip-list">
         <label class="cso-check cso-check--filled cso-check--glow" *ngFor="let a of areas" style="display:flex; align-items:center; gap:6px;">
           <input type="checkbox" [checked]="selectedAreaSet().has(a)" (change)="toggleArea(a, $event.target.checked)" />
           <span>{{a}}</span>
         </label>
       </div>
-      <div class="filter-actions" style="display:flex; gap:0.5rem;">
-        <button class="cso-btn" (click)="selectAll()">Todas</button>
+      <div class="filter-actions">
+        <button class="cso-btn" style="margin-right: 0.5rem;" (click)="selectAll()">Todas</button>
         <button class="cso-btn" (click)="clearAreas()">Ninguna</button>
       </div>
     </div>
 
     <div class="form-field">
       <label>Tipos de entrega</label>
-      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <div class="chip-list">
         <label class="cso-check cso-check--filled cso-check--glow" *ngFor="let t of types" style="display:flex; align-items:center; gap:6px;">
           <input type="checkbox" [checked]="selectedTypeSet().has(t)" (change)="toggleType(t, $event.target.checked)" />
           <span>{{t}}</span>
         </label>
       </div>
-      <div class="filter-actions" style="display:flex; gap:0.5rem;">
-        <button class="cso-btn" (click)="selectAllTypes()">Todos</button>
+      <div class="filter-actions">
+        <button class="cso-btn" style="margin-right: 0.5rem;" (click)="selectAllTypes()">Todos</button>
         <button class="cso-btn" (click)="clearTypes()">Ninguno</button>
       </div>
     </div>
@@ -132,7 +132,7 @@
         </mat-datepicker-toggle>
         <mat-date-range-picker #picker (closed)="applyFilters()"></mat-date-range-picker>
       </mat-form-field>
-      <div class="filter-actions" style="display:flex; gap:0.5rem;">
+      <div class="filter-actions">
         <button class="cso-btn" (click)="resetDate()">Limpiar filtros</button>
       </div>
     </div>
@@ -141,10 +141,9 @@
 
 <section class="grid grid-2">
   <div class="chart-panel" role="img" aria-label="En tiempo vs Fuera de tiempo por área">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div class="chart-header">
       <h4 class="chart-title">En tiempo vs Fuera de tiempo por Área</h4>
-      <div class="cso-legend"
-           style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: right;">
+      <div class="cso-legend legend-row">
         @for (item of colorMapArea; track item.tipo) {
           <div class="item">
             <span class="swatch" [style.background]="item.color"></span>
@@ -156,7 +155,7 @@
 
       </div>
     </div>
-    <div class="cso-bars" *ngIf="areaAgg().length > 0; else noDataBars" style="margin-bottom: 3rem;">
+    <div class="cso-bars mb-48" *ngIf="areaAgg().length > 0; else noDataBars">
         <div class="col" *ngFor="let r of areaAgg(); trackBy: trackArea">
           <div></div>
           <div class="bar time" [style.height.%]="barHeight(r.enTiempo)" [title]="tooltip(r, 'En tiempo')"></div>
