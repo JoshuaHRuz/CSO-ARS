@@ -28,53 +28,63 @@
       <i class="bi bi-caret-up" style="padding-right: 1.5rem;" (click)="closeDetails()"></i>
     </div>
 
-    @let isDeliveredView = showTimeDetails === 'Entregadas';
-    @let showOnTime = showTimeDetails === 'En proceso y en tiempo';
-    @let showLate = showTimeDetails === 'En proceso y fuera de tiempo';
+    <div style="overflow:auto;">
+      <table mat-table [dataSource]="dataSource" matSort [matSortActive]="'id'" matSortDirection="asc" class="cso-mat-table mat-elevation-z0">
 
-    <table class="table">
-      <thead>
-      <tr>
-        <th>ID</th>
-        <th>Plataforma</th>
-        @if (!isDeliveredView) { <th>Área</th> }
-        <th>Tipo</th>
-        <th>Solicitud</th>
-        <th>Compromiso</th>
-        <th>Entrega</th>
-        @if (!isDeliveredView) { <th>Status</th> }
-        <th>Observaciones</th>
-      </tr>
-      </thead>
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let delivery">{{ delivery.id }}</td>
+        </ng-container>
 
-      <tbody>
-        @for (delivery of filtered(); track delivery.id) {
-          @if (
-            (isDeliveredView && delivery.status === 'Entregada') ||
-            (showOnTime && isOnTime(delivery)) ||
-            (showLate && isLate(delivery))
-            ) {
-            <tr>
-              <td>{{ delivery.id }}</td>
-              <td>{{ delivery.nombrePlataforma }}</td>
-              @if (!isDeliveredView) { <td>{{ delivery.area }}</td> }
-              <td>{{ delivery.tipo }}</td>
-              <td>{{ delivery.fechaSolicitud | date: 'shortDate' }}</td>
-              <td>{{ delivery.fechaCompromiso ? (delivery.fechaCompromiso | date: 'shortDate') : '—' }}</td>
-              <td>{{ delivery.fechaEntrega ? (delivery.fechaEntrega | date: 'shortDate') : '—' }}</td>
-              @if (!isDeliveredView) { <td>{{ delivery.status }}</td> }
-              <td>{{ delivery.observaciones || '—' }}</td>
-            </tr>
-          }
-        } @empty {
-          <tr>
-            <td [attr.colspan]="isDeliveredView ? 7 : 9" class="text-center">
-              Sin resultados para "{{ showTimeDetails }}"
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+        <ng-container matColumnDef="nombrePlataforma">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Plataforma</th>
+          <td mat-cell *matCellDef="let delivery">{{ delivery.nombrePlataforma }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="area">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Área</th>
+          <td mat-cell *matCellDef="let delivery">{{ delivery.area }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+          <td mat-cell *matCellDef="let delivery">{{ delivery.tipo }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaSolicitud">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Solicitud</th>
+          <td mat-cell *matCellDef="let delivery">{{ delivery.fechaSolicitud | date: 'shortDate' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaCompromiso">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Compromiso</th>
+          <td mat-cell *matCellDef="let delivery">{{ delivery.fechaCompromiso ? (delivery.fechaCompromiso | date: 'shortDate') : '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaEntrega">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Entrega</th>
+          <td mat-cell *matCellDef="let delivery">{{ delivery.fechaEntrega ? (delivery.fechaEntrega | date: 'shortDate') : '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let delivery">{{ delivery.status }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="observaciones">
+          <th mat-header-cell *matHeaderCellDef>Observaciones</th>
+          <td mat-cell *matCellDef="let delivery">{{ delivery.observaciones || '—' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="detailDisplayedColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: detailDisplayedColumns();"></tr>
+
+        <tr class="mat-row" matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="detailDisplayedColumns().length">Sin resultados para "{{ showTimeDetails }}"</td>
+        </tr>
+      </table>
+    </div>
+    <mat-paginator [pageSize]="10" [pageSizeOptions]="[10,25,50,100]" showFirstLastButtons></mat-paginator>
   </section>
 }
 
