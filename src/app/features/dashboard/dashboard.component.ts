@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { DeliveryService } from '../../services/delivery.service';
 import { Area, DeliveryType, PlatformDelivery } from '../../models/platform-delivery.model';
@@ -32,6 +33,7 @@ export class DashboardComponent {
   areaAgg = signal<AreaAgg[]>([]);
   typeAgg = signal<TypeAgg[]>([]);
 
+  showTimeDetails: String | null  = null;
   readonly maxBars = signal(1);
   readonly circumference = 2 * Math.PI * 90; // r=90
 
@@ -43,6 +45,10 @@ export class DashboardComponent {
   }
 
   trackArea = (_: number, r: AreaAgg) => r.area;
+  colorMapArea = [
+    { tipo: 'En tiempo', color: 'var(--cso-primary)' },
+    { tipo: 'Fuera de tiempo', color: 'var(--cso-orange-a)' }
+  ];
 
   selectAll() {
     this.selectedAreaSet.set(new Set(this.areas));
@@ -138,5 +144,27 @@ export class DashboardComponent {
       offset -= len;
       return seg;
     });
+  }
+  resetDate() {
+    this.dateFrom = null;
+    this.dateTo = null;
+    this.applyFilters();
+  }
+  updateDetails(time: String):void{
+    this.showTimeDetails = time;
+  }
+  closeDetails():void{
+    this.showTimeDetails = null;
+  }
+  now = new Date();
+
+  isOnTime(delivery: PlatformDelivery): boolean {
+    if (delivery.status !== 'En proceso' || !delivery.fechaCompromiso) return false;
+    return new Date(delivery.fechaCompromiso) >= this.now;
+  }
+
+  isLate(delivery: PlatformDelivery): boolean {
+    if (delivery.status !== 'En proceso' || !delivery.fechaCompromiso) return false;
+    return new Date(delivery.fechaCompromiso) < this.now;
   }
 }

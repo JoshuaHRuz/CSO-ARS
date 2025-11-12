@@ -37,6 +37,9 @@ body {
   box-shadow: var(--cso-shadow);
   border-radius: 10px;
 }
+.kpi-card:hover{
+  cursor: pointer;
+}
 
 /* KPI emphasis */
 .kpi-number {
@@ -170,3 +173,5 @@ a { color: var(--cso-primary); text-decoration: none;  }
 a:hover { text-decoration-line: underline; }
 a:focus { outline: 2px solid var(--cso-orange-b); outline-offset: 2px; }
 a:visited { color: var(--cso-primary); }
+
+.bi-caret-up:hover { color: var(--cso-primary);  cursor: pointer; }
