@@ -133,13 +133,19 @@ body {
 .cso-legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
 
 /* Forms */
-.form-field { display: grid; gap: 6px; }
-.form-row { display: grid; gap: 12px; grid-template-columns: repeat(3, 1fr); }
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-row { display: grid; gap: 1rem; grid-template-columns: repeat(3, 1fr); align-items: stretch; }
 @media (max-width: 900px) { .form-row { grid-template-columns: 1fr; } }
 .input, select {
   background: #0e1520; color: var(--cso-text); border: 1px solid var(--cso-border); border-radius: 8px; padding: 8px 10px;
 }
 label { color: rgba(255,255,255,0.85); font-size: 14px; }
+
+/* Filter blocks normalization */
+.form-field > .cso-check { margin-right: 0.5rem; }
+.form-field > div[style*="flex; flex-wrap:wrap"] { margin-bottom: 0.5rem; }
+.form-field .cso-btn { padding: 0.6rem 1rem; }
+.filter-actions { margin-top: auto; }
 
 /* Utility colors */
 .cso-accent { color: var(--cso-orange-b); }

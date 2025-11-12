@@ -25,6 +25,8 @@ export class DashboardComponent implements AfterViewInit {
 
   areas: Area[] = this.service.getAreas();
   selectedAreaSet = signal<Set<Area>>(new Set<Area>(this.areas));
+  types: DeliveryType[] = this.service.getTypes();
+  selectedTypeSet = signal<Set<DeliveryType>>(new Set<DeliveryType>(this.types));
   dateFrom: Date | null = null;
   dateTo: Date | null = null;
 
@@ -120,13 +122,30 @@ export class DashboardComponent implements AfterViewInit {
     this.applyFilters();
   }
 
+  selectAllTypes() {
+    this.selectedTypeSet.set(new Set(this.types));
+    this.applyFilters();
+  }
+  clearTypes() {
+    this.selectedTypeSet.set(new Set());
+    this.applyFilters();
+  }
+  toggleType(t: DeliveryType, on: boolean) {
+    const next = new Set(this.selectedTypeSet());
+    if (on) next.add(t); else next.delete(t);
+    this.selectedTypeSet.set(next);
+    this.applyFilters();
+  }
+
   applyFilters() {
     const areas = this.selectedAreaSet();
+    const types = this.selectedTypeSet();
     const from = this.dateFrom ?? undefined;
     const to = this.dateTo ?? undefined;
 
     let rows = this.all();
     if (areas.size > 0) rows = rows.filter(r => areas.has(r.area));
+    if (types.size > 0) rows = rows.filter(r => types.has(r.tipo));
     if (from) rows = rows.filter(r => new Date(r.fechaSolicitud) >= from);
     if (to) rows = rows.filter(r => new Date(r.fechaSolicitud) <= to);
 
@@ -206,8 +225,12 @@ export class DashboardComponent implements AfterViewInit {
     this.dateTo = null;
     this.applyFilters();
   }
-  updateDetails(time: String):void{
-    this.showTimeDetails = time as string;
+  updateDetails(time: string): void {
+    if (this.showTimeDetails === time) {
+      this.showTimeDetails = null;
+    } else {
+      this.showTimeDetails = time;
+    }
     this.updateDetailTable();
   }
   closeDetails():void{

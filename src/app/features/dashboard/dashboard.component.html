@@ -100,12 +100,27 @@
           <span>{{a}}</span>
         </label>
       </div>
-      <div style="margin-top:8px; display:flex; gap:8px;">
+      <div class="filter-actions" style="display:flex; gap:0.5rem;">
         <button class="cso-btn" (click)="selectAll()">Todas</button>
         <button class="cso-btn" (click)="clearAreas()">Ninguna</button>
       </div>
     </div>
-    <div class="form-field" style="grid-column: span 2;">
+
+    <div class="form-field">
+      <label>Tipos de entrega</label>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <label class="cso-check cso-check--filled cso-check--glow" *ngFor="let t of types" style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" [checked]="selectedTypeSet().has(t)" (change)="toggleType(t, $event.target.checked)" />
+          <span>{{t}}</span>
+        </label>
+      </div>
+      <div class="filter-actions" style="display:flex; gap:0.5rem;">
+        <button class="cso-btn" (click)="selectAllTypes()">Todos</button>
+        <button class="cso-btn" (click)="clearTypes()">Ninguno</button>
+      </div>
+    </div>
+
+    <div class="form-field">
       <label>Rango de fechas</label>
       <mat-form-field appearance="fill" class="cso-mat-field">
         <mat-date-range-input [rangePicker]="picker">
@@ -117,7 +132,7 @@
         </mat-datepicker-toggle>
         <mat-date-range-picker #picker (closed)="applyFilters()"></mat-date-range-picker>
       </mat-form-field>
-      <div style="margin-top:8px; display:flex; gap:8px; height: 3rem;">
+      <div class="filter-actions" style="display:flex; gap:0.5rem;">
         <button class="cso-btn" (click)="resetDate()">Limpiar filtros</button>
       </div>
     </div>
