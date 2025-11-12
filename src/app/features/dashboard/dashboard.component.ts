@@ -1,4 +1,4 @@
-import { Component, inject, signal, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, inject, signal, ViewChild, AfterViewInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { DeliveryService } from '../../services/delivery.service';
 import { Area, DeliveryType, PlatformDelivery } from '../../models/platform-delivery.model';
+import { DashboardStore } from './dashboard.store';
 
 interface AreaAgg { area: Area; enTiempo: number; fueraTiempo: number; }
 interface TypeAgg { tipo: DeliveryType; total: number; color: string; }
@@ -18,22 +19,25 @@ interface TypeAgg { tipo: DeliveryType; total: number; color: string; }
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule, MatFormFieldModule, MatDatepickerModule, MatNativeDateModule, MatInputModule, MatTableModule, MatPaginatorModule, MatSortModule],
-  templateUrl: 'dashboard.component.html'
+  templateUrl: 'dashboard.component.html',
+  providers: [DashboardStore]
 })
 export class DashboardComponent implements AfterViewInit {
   private service = inject(DeliveryService);
+  readonly store = inject(DashboardStore);
 
-  areas: Area[] = this.service.getAreas();
-  selectedAreaSet = signal<Set<Area>>(new Set<Area>(this.areas));
-  types: DeliveryType[] = this.service.getTypes();
-  selectedTypeSet = signal<Set<DeliveryType>>(new Set<DeliveryType>(this.types));
+  // Expose filters bound in template
+  areas: Area[] = this.store.areas;
+  types: DeliveryType[] = this.store.types;
+  selectedAreaSet = this.store.selectedAreaSet;
+  selectedTypeSet = this.store.selectedTypeSet;
+  // Keep date pickers local and sync to store
   dateFrom: Date | null = null;
   dateTo: Date | null = null;
 
-  all = signal<PlatformDelivery[]>([]);
-  filtered = signal<PlatformDelivery[]>([]);
+  filtered = this.store.filtered;
   dataSource = new MatTableDataSource<PlatformDelivery>([]);
-  detailDisplayedColumns = signal<string[]>(['id','nombrePlataforma','area','tipo','fechaSolicitud','fechaCompromiso','fechaEntrega','status','observaciones']);
+  detailDisplayedColumns = this.store.detailDisplayedColumns;
 
   private _paginator?: MatPaginator;
   private _sort?: MatSort;
@@ -58,18 +62,21 @@ export class DashboardComponent implements AfterViewInit {
     }
   }
 
-  kpi = signal({ entregadas: 0, enTiempo: 0, fueraTiempo: 0 });
-  areaAgg = signal<AreaAgg[]>([]);
-  typeAgg = signal<TypeAgg[]>([]);
+  kpi = this.store.kpi;
+  areaAgg = this.store.areaAgg;
+  typeAgg = this.store.typeAgg;
 
-  showTimeDetails: string | null  = null;
-  readonly maxBars = signal(1);
-  readonly circumference = 2 * Math.PI * 90; // r=90
+  get showTimeDetails(): string | null { return this.store.showTimeDetails(); }
+  readonly maxBars = this.store.maxBars;
+  readonly circumference = this.store.circumference;
 
   constructor() {
     this.service.getAll().subscribe((rows) => {
-      this.all.set(rows);
-      this.applyFilters();
+      this.store.setAll(rows);
+    });
+    effect(() => {
+      this.dataSource.data = this.store.detailRows();
+      if (this._paginator) this._paginator.firstPage();
     });
   }
 
@@ -108,170 +115,53 @@ export class DashboardComponent implements AfterViewInit {
   ];
 
   selectAll() {
-    this.selectedAreaSet.set(new Set(this.areas));
-    this.applyFilters();
+    this.store.selectAllAreas();
   }
   clearAreas() {
-    this.selectedAreaSet.set(new Set());
-    this.applyFilters();
+    this.store.clearAreas();
   }
   toggleArea(a: Area, on: boolean) {
-    const next = new Set(this.selectedAreaSet());
-    if (on) next.add(a); else next.delete(a);
-    this.selectedAreaSet.set(next);
-    this.applyFilters();
+    this.store.toggleArea(a, on);
   }
 
   selectAllTypes() {
-    this.selectedTypeSet.set(new Set(this.types));
-    this.applyFilters();
+    this.store.selectAllTypes();
   }
   clearTypes() {
-    this.selectedTypeSet.set(new Set());
-    this.applyFilters();
+    this.store.clearTypes();
   }
   toggleType(t: DeliveryType, on: boolean) {
-    const next = new Set(this.selectedTypeSet());
-    if (on) next.add(t); else next.delete(t);
-    this.selectedTypeSet.set(next);
-    this.applyFilters();
+    this.store.toggleType(t, on);
   }
 
   applyFilters() {
-    const areas = this.selectedAreaSet();
-    const types = this.selectedTypeSet();
-    const from = this.dateFrom ?? undefined;
-    const to = this.dateTo ?? undefined;
-
-    let rows = this.all();
-    if (areas.size > 0) rows = rows.filter(r => areas.has(r.area));
-    if (types.size > 0) rows = rows.filter(r => types.has(r.tipo));
-    if (from) rows = rows.filter(r => new Date(r.fechaSolicitud) >= from);
-    if (to) rows = rows.filter(r => new Date(r.fechaSolicitud) <= to);
-
-    this.filtered.set(rows);
-    this.updateDetailTable();
-
-    // KPIs
-    let entregadas = 0, enTiempo = 0, fueraTiempo = 0;
-    const now = new Date();
-    for (const r of rows) {
-      if (r.status === 'Entregada') entregadas++;
-      else {
-        const comp = new Date(r.fechaCompromiso!);
-        if (now <= comp) enTiempo++; else fueraTiempo++;
-      }
-    }
-    this.kpi.set({ entregadas, enTiempo, fueraTiempo });
-
-    // Area aggregation (only en proceso)
-    const aggMap = new Map<Area, AreaAgg>();
-    const baseAreas: Area[] = (areas.size > 0 ? Array.from(areas) : this.areas);
-    baseAreas.forEach(a => aggMap.set(a, { area: a, enTiempo: 0, fueraTiempo: 0 }));
-    for (const r of rows) {
-      if (r.status !== 'En proceso') continue;
-      const comp = new Date(r.fechaCompromiso!);
-      const bucket = aggMap.get(r.area)!;
-      if (now <= comp) bucket.enTiempo++; else bucket.fueraTiempo++;
-    }
-    const areaArr = Array.from(aggMap.values());
-    const max = Math.max(1, ...areaArr.map(x => Math.max(x.enTiempo, x.fueraTiempo)));
-    this.maxBars.set(max);
-    this.areaAgg.set(areaArr);
-
-    // Type distribution
-    const colorMap: Record<DeliveryType, string> = {
-      'Manual': 'var(--cso-orange-a)',
-      'Semi-digital': 'var(--cso-orange-b)',
-      'Full-digital': 'var(--cso-primary)'
-    };
-    const tMap = new Map<DeliveryType, TypeAgg>();
-    for (const t of ['Manual','Semi-digital','Full-digital'] as DeliveryType[]) {
-      tMap.set(t, { tipo: t, total: 0, color: colorMap[t] });
-    }
-    for (const r of rows) {
-      const b = tMap.get(r.tipo)!; b.total++;
-    }
-    this.typeAgg.set(Array.from(tMap.values()));
+    this.store.setDateRange(this.dateFrom, this.dateTo);
   }
 
   barHeight(value: number): number {
-    const max = this.maxBars();
-    return Math.round((value / max) * 100);
+    return this.store.barHeight(value);
   }
 
   tooltip(r: AreaAgg, label: 'En tiempo' | 'Fuera de tiempo'): string {
-    const total = r.enTiempo + r.fueraTiempo;
-    const value = label === 'En tiempo' ? r.enTiempo : r.fueraTiempo;
-    const pct = total ? Math.round((value / total) * 100) : 0;
-    return `${r.area}: ${label} ${value} (${pct}%)`;
+    return this.store.tooltip(r, label);
   }
 
-  totalFiltered() { return this.filtered().length; }
-  percent(v: number, total: number): string { return total ? Math.round((v/total)*100) + '%' : '0%'; }
+  totalFiltered() { return this.store.totalFiltered(); }
+  percent(v: number, total: number): string { return this.store.percent(v, total); }
 
   donutSets() {
-    const total = this.totalFiltered() || 1;
-    let offset = 0;
-    return this.typeAgg().map((t) => {
-      const len = (t.total / total) * this.circumference;
-      const seg = { len, offset, color: t.color } as any;
-      offset -= len;
-      return seg;
-    });
+    return this.store.donutSets();
   }
   resetDate() {
     this.dateFrom = null;
     this.dateTo = null;
-    this.applyFilters();
+    this.store.resetDate();
   }
   updateDetails(time: string): void {
-    if (this.showTimeDetails === time) {
-      this.showTimeDetails = null;
-    } else {
-      this.showTimeDetails = time;
-    }
-    this.updateDetailTable();
+    this.store.updateDetails(time);
   }
   closeDetails():void{
-    this.showTimeDetails = null;
-    this.updateDetailTable();
+    this.store.closeDetails();
   }
-  now = new Date();
-
-  isOnTime(delivery: PlatformDelivery): boolean {
-    if (delivery.status !== 'En proceso' || !delivery.fechaCompromiso) return false;
-    return new Date(delivery.fechaCompromiso) >= this.now;
-  }
-
-  isLate(delivery: PlatformDelivery): boolean {
-    if (delivery.status !== 'En proceso' || !delivery.fechaCompromiso) return false;
-    return new Date(delivery.fechaCompromiso) < this.now;
-  }
-
-  private updateDetailTable(): void {
-    const base = this.filtered();
-    let rows: PlatformDelivery[] = base;
-    const view = this.showTimeDetails;
-
-    if (view === 'Entregadas') {
-      rows = base.filter(r => r.status === 'Entregada');
-      this.detailDisplayedColumns.set(['id','nombrePlataforma','tipo','fechaSolicitud','fechaCompromiso','fechaEntrega','observaciones']);
-    } else if (view === 'En proceso y en tiempo') {
-      rows = base.filter(r => this.isOnTime(r));
-      this.detailDisplayedColumns.set(['id','nombrePlataforma','area','tipo','fechaSolicitud','fechaCompromiso','fechaEntrega','status','observaciones']);
-    } else if (view === 'En proceso y fuera de tiempo') {
-      rows = base.filter(r => this.isLate(r));
-      this.detailDisplayedColumns.set(['id','nombrePlataforma','area','tipo','fechaSolicitud','fechaCompromiso','fechaEntrega','status','observaciones']);
-    } else {
-      // Sin vista seleccionada
-      rows = [];
-    }
-
-    this.dataSource.data = rows;
-    // Reset paginación a primera página cuando cambia el conjunto
-    if (this._paginator) {
-      this._paginator.firstPage();
-    }
-  }
+  // Filtering helpers moved to store
 }
